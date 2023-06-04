@@ -1,1 +1,1 @@
-# Bevy template
+# {{project-name}}
