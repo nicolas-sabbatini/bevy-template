@@ -9,13 +9,13 @@ use bevy::{
 };
 
 use crate::config::{
-    GAME_CAMERA_CLEAR_COLOR, GAME_CAMERA_NAME, GAME_CAMERA_TARGET_NAME, WINDOWS_CAMERA_CLEAR_COLOR,
-    WINDOWS_CAMERA_NAME, WIN_HEIGHT, WIN_WIDTH,
+    GAME_CAMERA_CLEAR_COLOR, GAME_CAMERA_NAME, GAME_CAMERA_TARGET_NAME, WINDOW_CAMERA_CLEAR_COLOR,
+    WINDOW_CAMERA_NAME, WINDOW_HEIGHT, WINDOW_WIDTH,
 };
 
 const BGRA_PIXEL_SIZE: usize = 4;
-const WHITE_BGRA: [u8; (WIN_WIDTH * WIN_HEIGHT) as usize * BGRA_PIXEL_SIZE] =
-    [255; (WIN_WIDTH * WIN_HEIGHT) as usize * BGRA_PIXEL_SIZE];
+const WHITE_BGRA: [u8; (WINDOW_WIDTH * WINDOW_HEIGHT) as usize * BGRA_PIXEL_SIZE] =
+    [255; (WINDOW_WIDTH * WINDOW_HEIGHT) as usize * BGRA_PIXEL_SIZE];
 
 #[derive(Debug, Component)]
 pub struct GameCamera;
@@ -31,25 +31,25 @@ fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     // Set up windows camera
     let mut windows_camera = Camera2dBundle::default();
     windows_camera.projection.scaling_mode = ScalingMode::AutoMin {
-        min_width: WIN_WIDTH,
-        min_height: WIN_HEIGHT,
+        min_width: WINDOW_WIDTH,
+        min_height: WINDOW_HEIGHT,
     };
     // Set up clear color
-    windows_camera.camera_2d.clear_color = ClearColorConfig::Custom(WINDOWS_CAMERA_CLEAR_COLOR);
+    windows_camera.camera_2d.clear_color = ClearColorConfig::Custom(WINDOW_CAMERA_CLEAR_COLOR);
     // Set up camera order to be the last
     windows_camera.camera.order = 2;
     // Spawn windows camera
     commands
         .spawn(windows_camera)
-        .insert(Name::new(WINDOWS_CAMERA_NAME))
+        .insert(Name::new(WINDOW_CAMERA_NAME))
         // Only draw layer 1
         .insert(RenderLayers::layer(1));
 
     // Set up letter boxing
     // Create render target texture
     let render_target_size = Extent3d {
-        width: WIN_WIDTH as u32,
-        height: WIN_HEIGHT as u32,
+        width: WINDOW_WIDTH as u32,
+        height: WINDOW_HEIGHT as u32,
         ..default()
     };
     // Create render target image in NOT wasm targets

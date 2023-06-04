@@ -1,3 +1,1 @@
 # Bevy template
-
-## TODO:

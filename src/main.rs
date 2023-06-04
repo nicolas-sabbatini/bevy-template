@@ -16,8 +16,8 @@ fn main() {
 
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
-            resolution: WindowResolution::new(WIN_WIDTH, WIN_HEIGHT),
-            title: WIN_TITLE.to_string(),
+            resolution: WindowResolution::new(WINDOW_WIDTH, WINDOW_HEIGHT),
+            title: WINDOW_TITLE.to_string(),
             fit_canvas_to_parent: true,
             ..default()
         }),
