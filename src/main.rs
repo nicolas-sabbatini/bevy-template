@@ -1,6 +1,4 @@
-// // Load and use this module on debug
-#[cfg(debug_assertions)]
-use debug_plugin::DebugPlugin;
+// Load and use this module on debug
 #[cfg(debug_assertions)]
 mod debug_plugin;
 
@@ -36,7 +34,7 @@ fn main() {
 
     // // Add this plugins and system on debug
     #[cfg(debug_assertions)]
-    app.add_plugins(DebugPlugin);
+    app.add_plugins(debug_plugin::DebugPlugin);
 
     app.add_plugins((CameraPlugin, FlowControlPlugin, AssetLoadingPlugin));
 

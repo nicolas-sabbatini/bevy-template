@@ -7,7 +7,7 @@ pub enum GameSet {}
 pub enum GameState {
     #[default]
     LoadAssets,
-    RunGame,
+    RunMainLoop,
 }
 
 #[derive(States, Debug, Hash, PartialEq, Eq, Clone, Default)]

@@ -15,20 +15,35 @@ impl Plugin for AssetLoadingPlugin {
 }
 
 #[derive(Default, Resource)]
-pub struct AssetList(pub Vec<HandleUntyped>);
+pub struct AssetList(pub Vec<UntypedHandle>);
 
 pub fn check_asset_loading(
     asset_server: Res<AssetServer>,
     asset_list: Res<AssetList>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    println!("check_asset_loading");
-    match asset_server.get_group_load_state(asset_list.0.iter().map(|a| a.id())) {
+    let status =
+        asset_list
+            .0
+            .iter()
+            .map(|a| a.id())
+            .fold(LoadState::Loaded, |general_status, asset_id| {
+                let status = asset_server
+                    .get_load_state(asset_id)
+                    .expect("The asset do not exist");
+                match status {
+                    LoadState::Failed => LoadState::Failed,
+                    LoadState::Loaded if general_status != LoadState::Loaded => general_status,
+                    LoadState::Loaded => LoadState::Loaded,
+                    _ => LoadState::Loading,
+                }
+            });
+    match status {
         LoadState::Loaded => {
-            next_state.set(GameState::RunGame);
+            next_state.set(GameState::RunMainLoop);
         }
         LoadState::Failed => {
-            error!("asset loading error");
+            panic!("Asset loading error!");
         }
         _ => {}
     };
