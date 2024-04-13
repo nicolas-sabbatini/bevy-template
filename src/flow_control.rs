@@ -19,6 +19,6 @@ pub enum PlayState {
 pub struct FlowControlPlugin;
 impl Plugin for FlowControlPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state::<GameState>().add_state::<PlayState>();
+        app.init_state::<GameState>().init_state::<PlayState>();
     }
 }

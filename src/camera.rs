@@ -6,10 +6,10 @@
     clippy::module_name_repetitions
 )]
 use bevy::{
-    core_pipeline::clear_color::ClearColorConfig,
     prelude::*,
     render::{
         camera::{RenderTarget, ScalingMode},
+        render_asset::RenderAssetUsages,
         render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages},
         view::RenderLayers,
     },
@@ -40,7 +40,7 @@ fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
         min_height: WINDOW_HEIGHT,
     };
     // Set up clear color
-    windows_camera.camera_2d.clear_color = ClearColorConfig::Custom(WINDOW_CAMERA_CLEAR_COLOR);
+    windows_camera.camera.clear_color = ClearColorConfig::Custom(WINDOW_CAMERA_CLEAR_COLOR);
     // Set up camera order to be the last
     windows_camera.camera.order = 2;
     // Spawn windows camera
@@ -64,6 +64,7 @@ fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
         TextureDimension::D2,
         &vec![255; (WINDOW_WIDTH * WINDOW_HEIGHT) as usize * BGRA_PIXEL_SIZE],
         TextureFormat::Bgra8UnormSrgb,
+        RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
     );
     // Create render target image in wasm targets
     #[cfg(target_arch = "wasm32")]
@@ -72,6 +73,7 @@ fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
         TextureDimension::D2,
         &vec![255; (WINDOW_WIDTH * WINDOW_HEIGHT) as usize * BGRA_PIXEL_SIZE],
         TextureFormat::Rgba8UnormSrgb,
+        RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
     );
     // By default an image can't be used as a render target so we need to setup the render target falg
     render_target_image.texture_descriptor.usage |= TextureUsages::RENDER_ATTACHMENT;
@@ -91,7 +93,7 @@ fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     let mut game_camera = Camera2dBundle::default();
     // Set up the render target created previously as target
     game_camera.camera.target = RenderTarget::Image(render_target_handle);
-    game_camera.camera_2d.clear_color = ClearColorConfig::Custom(GAME_CAMERA_CLEAR_COLOR);
+    game_camera.camera.clear_color = ClearColorConfig::Custom(GAME_CAMERA_CLEAR_COLOR);
     // Give the game camere the highest order
     game_camera.camera.order = 1;
     // Spawn game camera
