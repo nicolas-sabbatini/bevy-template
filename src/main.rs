@@ -2,16 +2,12 @@
 #[cfg(debug_assertions)]
 mod debug_plugin;
 
-use asset_loading::AssetLoadingPlugin;
 use bevy::{prelude::*, window::WindowResolution};
-use camera::CameraPlugin;
-use config::*;
-use flow_control::FlowControlPlugin;
+use config::{GAME_HEIGHT, GAME_WIDTH, WINDOW_TITLE};
 
 mod asset_loading;
 mod camera;
 mod config;
-mod constants;
 mod flow_control;
 
 fn main() {
@@ -21,7 +17,7 @@ fn main() {
         DefaultPlugins
             .set(WindowPlugin {
                 primary_window: Some(Window {
-                    resolution: WindowResolution::new(WINDOW_WIDTH * 2.0, WINDOW_HEIGHT * 2.0),
+                    resolution: WindowResolution::new(GAME_WIDTH, GAME_HEIGHT),
                     title: WINDOW_TITLE.to_string(),
                     ..default()
                 }),
@@ -31,11 +27,11 @@ fn main() {
     )
     .insert_resource(Msaa::Off);
 
-    // // Add this plugins and system on debug
+    // Add this plugins and system on debug
     #[cfg(debug_assertions)]
-    app.add_plugins(debug_plugin::DebugPlugin);
+    app.add_plugins(debug_plugin::Plug);
 
-    app.add_plugins((CameraPlugin, FlowControlPlugin, AssetLoadingPlugin));
+    app.add_plugins((camera::Plug, flow_control::Plug, asset_loading::Plug));
 
     app.run();
 }

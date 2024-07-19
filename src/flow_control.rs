@@ -16,8 +16,8 @@ pub enum PlayState {
     None,
 }
 
-pub struct FlowControlPlugin;
-impl Plugin for FlowControlPlugin {
+pub struct Plug;
+impl Plugin for Plug {
     fn build(&self, app: &mut App) {
         app.init_state::<GameState>().init_state::<PlayState>();
     }

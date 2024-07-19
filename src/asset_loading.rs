@@ -4,8 +4,8 @@ use bevy::prelude::*;
 
 use crate::flow_control::GameState;
 
-pub struct AssetLoadingPlugin;
-impl Plugin for AssetLoadingPlugin {
+pub struct Plug;
+impl Plugin for Plug {
     fn build(&self, app: &mut App) {
         app.init_resource::<AssetList>().add_systems(
             Update,
@@ -32,7 +32,7 @@ pub fn check_asset_loading(
                     .get_load_state(asset_id)
                     .expect("The asset do not exist");
                 match status {
-                    LoadState::Failed => LoadState::Failed,
+                    LoadState::Failed(e) => LoadState::Failed(e),
                     LoadState::Loaded if general_status != LoadState::Loaded => general_status,
                     LoadState::Loaded => LoadState::Loaded,
                     _ => LoadState::Loading,
@@ -42,8 +42,8 @@ pub fn check_asset_loading(
         LoadState::Loaded => {
             next_state.set(GameState::RunMainLoop);
         }
-        LoadState::Failed => {
-            panic!("Asset loading error!");
+        LoadState::Failed(e) => {
+            panic!("{e:?}");
         }
         _ => {}
     };

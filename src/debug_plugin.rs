@@ -1,12 +1,9 @@
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 
-pub struct DebugPlugin;
-impl Plugin for DebugPlugin {
+pub struct Plug;
+impl Plugin for Plug {
     fn build(&self, app: &mut App) {
-        app.add_plugins((
-            LogDiagnosticsPlugin::default(),
-            FrameTimeDiagnosticsPlugin::default(),
-        ));
+        app.add_plugins((LogDiagnosticsPlugin::default(), FrameTimeDiagnosticsPlugin));
     }
 }

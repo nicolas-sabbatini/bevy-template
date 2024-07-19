@@ -2,8 +2,7 @@
     clippy::needless_pass_by_value,
     clippy::cast_precision_loss,
     clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::module_name_repetitions
+    clippy::cast_sign_loss
 )]
 use bevy::{
     prelude::*,
@@ -15,18 +14,23 @@ use bevy::{
     },
 };
 
-use crate::config::{
-    GAME_CAMERA_CLEAR_COLOR, GAME_CAMERA_NAME, GAME_CAMERA_TARGET_NAME, WINDOW_CAMERA_CLEAR_COLOR,
-    WINDOW_CAMERA_NAME, WINDOW_HEIGHT, WINDOW_WIDTH,
-};
+use crate::config::{GAME_CAMERA_CLEAR_COLOR, GAME_HEIGHT, GAME_WIDTH, WINDOW_CAMERA_CLEAR_COLOR};
 
 const BGRA_PIXEL_SIZE: usize = 4;
 
+#[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Component)]
 pub struct GameCamera;
 
-pub struct CameraPlugin;
-impl Plugin for CameraPlugin {
+#[allow(clippy::module_name_repetitions)]
+#[derive(Debug, Component)]
+pub struct WindowCamera;
+
+#[derive(Debug, Component)]
+pub struct TextureRenderTarget;
+
+pub struct Plug;
+impl Plugin for Plug {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup_camera);
     }
@@ -36,42 +40,33 @@ fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     // Set up windows camera
     let mut windows_camera = Camera2dBundle::default();
     windows_camera.projection.scaling_mode = ScalingMode::AutoMin {
-        min_width: WINDOW_WIDTH,
-        min_height: WINDOW_HEIGHT,
+        min_width: GAME_WIDTH,
+        min_height: GAME_HEIGHT,
     };
-    // Set up clear color
     windows_camera.camera.clear_color = ClearColorConfig::Custom(WINDOW_CAMERA_CLEAR_COLOR);
-    // Set up camera order to be the last
-    windows_camera.camera.order = 2;
-    // Spawn windows camera
-    commands
-        .spawn(windows_camera)
-        .insert(Name::new(WINDOW_CAMERA_NAME))
-        // Only draw layer 1
-        .insert(RenderLayers::layer(1));
+    windows_camera.camera.order = 99;
+    commands.spawn((
+        windows_camera,
+        // Only see layer 1
+        RenderLayers::layer(1),
+        WindowCamera,
+    ));
 
     // Set up letter boxing
     // Create render target texture
     let render_target_size = Extent3d {
-        width: WINDOW_WIDTH as u32,
-        height: WINDOW_HEIGHT as u32,
+        width: GAME_WIDTH as u32,
+        height: GAME_HEIGHT as u32,
         ..default()
     };
-    // Create render target image in NOT wasm targets
-    #[cfg(not(target_arch = "wasm32"))]
     let mut render_target_image = Image::new_fill(
         render_target_size,
         TextureDimension::D2,
-        &vec![255; (WINDOW_WIDTH * WINDOW_HEIGHT) as usize * BGRA_PIXEL_SIZE],
+        &vec![255; (GAME_WIDTH * GAME_HEIGHT) as usize * BGRA_PIXEL_SIZE],
+        #[cfg(not(target_arch = "wasm32"))]
         TextureFormat::Bgra8UnormSrgb,
-        RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
-    );
-    // Create render target image in wasm targets
-    #[cfg(target_arch = "wasm32")]
-    let mut render_target_image = Image::new_fill(
-        render_target_size,
-        TextureDimension::D2,
-        &vec![255; (WINDOW_WIDTH * WINDOW_HEIGHT) as usize * BGRA_PIXEL_SIZE],
+        // Wasm neds a diferent Texture format
+        #[cfg(target_arch = "wasm32")]
         TextureFormat::Rgba8UnormSrgb,
         RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
     );
@@ -80,25 +75,21 @@ fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     // Add the render target to the image assets
     let render_target_handle = images.add(render_target_image);
     // Spawn render target on the world
-    commands
-        .spawn(SpriteBundle {
+    commands.spawn((
+        SpriteBundle {
             texture: render_target_handle.clone(),
             ..Default::default()
-        })
-        .insert(Name::new(GAME_CAMERA_TARGET_NAME))
-        // Only the windows camera can see the render target
-        .insert(RenderLayers::layer(1));
+        },
+        // Only windows camera can see
+        RenderLayers::layer(1),
+        TextureRenderTarget,
+    ));
 
     // Set up game camera
     let mut game_camera = Camera2dBundle::default();
     // Set up the render target created previously as target
     game_camera.camera.target = RenderTarget::Image(render_target_handle);
     game_camera.camera.clear_color = ClearColorConfig::Custom(GAME_CAMERA_CLEAR_COLOR);
-    // Give the game camere the highest order
     game_camera.camera.order = 1;
-    // Spawn game camera
-    commands
-        .spawn(game_camera)
-        .insert(Name::new(GAME_CAMERA_NAME))
-        .insert(GameCamera);
+    commands.spawn((game_camera, GameCamera));
 }
