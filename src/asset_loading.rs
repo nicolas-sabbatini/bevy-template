@@ -1,3 +1,4 @@
+#![allow(clippy::needless_pass_by_value)]
 // https://github.com/maciekglowka/hike_deck/blob/main/src/assets.rs
 use bevy::asset::LoadState;
 use bevy::prelude::*;
@@ -17,27 +18,26 @@ impl Plugin for Plug {
 #[derive(Default, Resource)]
 pub struct AssetList(pub Vec<UntypedHandle>);
 
-pub fn check_asset_loading(
+fn check_asset_loading(
     asset_server: Res<AssetServer>,
     asset_list: Res<AssetList>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    let status =
-        asset_list
-            .0
-            .iter()
-            .map(|a| a.id())
-            .fold(LoadState::Loaded, |general_status, asset_id| {
-                let status = asset_server
-                    .get_load_state(asset_id)
-                    .expect("The asset do not exist");
-                match status {
-                    LoadState::Failed(e) => LoadState::Failed(e),
-                    LoadState::Loaded if general_status != LoadState::Loaded => general_status,
-                    LoadState::Loaded => LoadState::Loaded,
-                    _ => LoadState::Loading,
-                }
-            });
+    let status = asset_list
+        .0
+        .iter()
+        .map(bevy::prelude::UntypedHandle::id)
+        .fold(LoadState::Loaded, |general_status, asset_id| {
+            let status = asset_server
+                .get_load_state(asset_id)
+                .expect("The asset do not exist");
+            match status {
+                LoadState::Failed(e) => LoadState::Failed(e),
+                LoadState::Loaded if general_status != LoadState::Loaded => general_status,
+                LoadState::Loaded => LoadState::Loaded,
+                _ => LoadState::Loading,
+            }
+        });
     match status {
         LoadState::Loaded => {
             next_state.set(GameState::RunMainLoop);
